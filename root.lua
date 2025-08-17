@@ -54,10 +54,17 @@ function root.new()
     local i = setmetatable({}, root)
 
     i.routes = {}
+    i.name = "root"
     i.host = nil
     i.port = nil
 
     return i
+end
+
+function root:set_name(name)
+    assert(type(name) == "string", "Argument <name> must be a string.")
+    self.name = name
+    return self
 end
 
 function root:bind(host, port)
@@ -138,7 +145,7 @@ function request.new(head, body)
     local i = setmetatable({}, request)
 
     i["HTTP-Version"] = head.version
-    
+
     i["Path"] = head.path:gsub("%?.*$", "")
     i["Path"] = i["Path"] :gsub("/+$", "")
     if i["Path"] == "" then i["Path"]  = "/" end
@@ -264,7 +271,15 @@ function response:get_body()
 end
 
 --+ START +--
+function root:display_server()
+    print("--+     " .. colors.blue .. self.name .. colors.reset .. "     +--" .. colors.reset ..
+    "\nHost: " .. colors.blue .. self.host .. colors.reset ..
+    "\nPort: " .. colors.blue .. self.port .. colors.reset ..
+    "\n--+" .. string.rep(" ", #self.name + 10) .. "+--\n")
+end
+
 function root:start()
+    self:display_server()
     http.createServer(self.host, self.port, function(head, body)
         local req = request.new(head, body)
 
